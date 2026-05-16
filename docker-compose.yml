@@ -52,8 +52,8 @@ services:
       - "8123:8123"
       - "9000:9000"
     environment:
-      - CLICKHOUSE_USER=admin
-      - CLICKHOUSE_PASSWORD=rahasia
+      - CLICKHOUSE_USER=kelompok28
+      - CLICKHOUSE_PASSWORD=kelompok28
       - CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT=1
 
   metabase:
