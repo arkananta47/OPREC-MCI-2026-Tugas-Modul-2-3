@@ -486,6 +486,3 @@ Pipeline berhasil:
 - Memproses analytics menggunakan Spark
 - Memuat data ke ClickHouse
 - Divisualisasikan di Metabase atau Power BI
-
-
-*MCI2026 — Modul 2 & 3 — Task 2 — Kelompok 28*
