@@ -33,8 +33,10 @@ def fetch_orders():
             order.get("order_hour_of_day", 0)
         )
 
-        days_since_prior_order = int(
-            order.get("days_since_prior_order", 0)
+        days_since_prior_order = (
+            int(order.get("days_since_prior_order"))
+            if order.get("days_since_prior_order") is not None
+            else 0
         )
 
         eval_set = str(order.get("eval_set"))

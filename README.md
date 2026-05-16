@@ -2,6 +2,8 @@
 
 > Tugas Modul 2 & 3 Lab MCI 2026 · End-to-End Modern Data Stack Implementation
 
+---
+
 # 👥 Anggota Kelompok 28
 
 | Nama | NRP |
@@ -9,10 +11,25 @@
 | Muh. Aqil Alqadri Syahid | 5025241161 |
 | Kadek Andra Wikanjaya Putra | 5025241187 |
 
+---
 
+# 🧰 Technology Stack
 
-**Pipeline Orchestration & Data Visualization**  
-`Apache Airflow` → `PySpark` → `ClickHouse` → `Metabase / Power BI`
+**Pipeline Orchestration & Data Visualization**
+
+```text
+Apache Airflow → PySpark → ClickHouse → Metabase / Power BI
+```
+
+---
+
+| Component      | Technology          | Function                                |
+| -------------- | ------------------- | --------------------------------------- |
+| Orchestration  | Apache Airflow      | Menjalankan dan monitoring ETL pipeline |
+| Processing     | PySpark             | Transformasi dan analytics data         |
+| Storage        | Parquet Data Lake   | Temporary staging layer                 |
+| Data Warehouse | ClickHouse          | Penyimpanan analytical tables           |
+| Visualization  | Metabase / Power BI | Dashboard dan visualisasi data          |
 
 ---
 
@@ -27,13 +44,16 @@
 
 # 🎯 Overview
 
-Project ini membangun **end-to-end ETL data pipeline** menggunakan:
+Project ini membangun **end-to-end ETL data pipeline** menggunakan modern data stack untuk memproses dataset grocery orders berbasis API.
 
-- **Apache Airflow** → orchestrasi pipeline
-- **PySpark** → transformasi & analytics
-- **Parquet Data Lake** → staging layer
-- **ClickHouse** → analytical data warehouse
-- **Metabase / Power BI** → dashboard visualization
+Pipeline melakukan:
+
+* **Extract data dari REST API**
+* **Transform nested JSON menjadi tabular dataset**
+* **Simpan data ke Data Lake format Parquet**
+* **Transformasi analytics menggunakan PySpark**
+* **Load hasil analytics ke ClickHouse**
+* **Visualisasi menggunakan Metabase dan Power BI**
 
 Dataset berasal dari REST API:
 
@@ -43,11 +63,38 @@ http://96.9.212.102:8000/orders
 
 Dataset berbentuk **Instacart-style grocery orders** yang berisi:
 
-- **orders**
-- **products**
-- **category / department**
+- **Order transaksi**
+- **Customer orders**
+- **Products information**
+- **Products categories**
 - **reordered items**
-- **customer orders**
+- **Shopping behaviour**
+
+---
+
+# 📦 Dataset Structure
+
+Contoh struktur data API:
+
+```json
+{
+  "order_id": 718195,
+  "user_id": 37056,
+  "order_number": 46,
+  "order_dow": 1,
+  "order_hour_of_day": 15,
+  "days_since_prior_order": 3,
+  "products": [
+    {
+      "product_id": 31720,
+      "product_name": "Organic Whole Milk",
+      "aisle": "milk",
+      "department": "dairy eggs",
+      "reordered": 1
+    }
+  ]
+}
+```
 
 ---
 
@@ -108,8 +155,6 @@ Dataset berbentuk **Instacart-style grocery orders** yang berisi:
 http://localhost:8080
 ```
 
----
-
 ## 2. Aktifkan DAG
 
 Aktifkan DAG:
@@ -117,8 +162,6 @@ Aktifkan DAG:
 ```text
 mci2026_orders_pipeline
 ```
-
----
 
 ## 3. Trigger DAG
 
@@ -131,13 +174,13 @@ Trigger DAG
 Pipeline akan menjalankan:
 
 ```text
-start
-   ↓
+   start
+     ↓
 fetch_orders
-   ↓
+     ↓
 process_orders_spark
-   ↓
-end
+     ↓
+    end
 ```
 
 ---
@@ -151,7 +194,7 @@ Script ini:
 - mengambil data dari REST API
 - melakukan parsing nested JSON
 - flatten products array
-- generate synthetic analytics fields
+- normalisasi struktur data
 - menyimpan hasil ke Parquet
 
 ## Output
@@ -167,30 +210,31 @@ Script ini:
 
 - membaca seluruh file parquet
 - melakukan transformasi analytics menggunakan PySpark
+- aggregasi data
 - load hasil ke ClickHouse
 
-## Tabel yang dihasilkan
+## Analytics yang dibuat
 
-| Tabel | Isi |
-|---|---|
-| orders | raw transactional data |
-| orders_trending_products | top products |
-| orders_category_summary | category analytics |
-| orders_daily_orders | daily analytics |
+| Table                    | Description            |
+| ------------------------ | ---------------------- |
+| orders                   | Raw transactional data |
+| orders_trending_products | Produk terlaris        |
+| orders_category_summary  | Analytics kategori     |
+| orders_daily_orders      | Analytics harian       |
 
 
-# 3. pipeline.py
+# 3. orders_pipeline.py
 
 Airflow DAG orchestration:
 
 ```text
-start
-  ↓
+   start
+     ↓
 fetch_orders
-  ↓
+     ↓
 process_orders_spark
-  ↓
-end
+     ↓
+    end
 ```
 
 ---
@@ -227,7 +271,7 @@ Analytics harian.
 
 # Setup Metabase
 
-## Pilih ClickHouse
+## Add Clickhouse Database
 
 **Database Information**:
 
@@ -240,110 +284,198 @@ Analytics harian.
 | Password | kelompok28 |
 
 
-# 📈 Dashboard Queries
+# 📈 Dashboard Queries & Insights
 
-## Q1 — Top Ordered Products
-
-Visualisasi:
-
-- Bar Chart
-
-Menampilkan:
-
-- produk paling sering dibeli
-
-
-## Q2 — Category Summary
+## Q1 — Daily Order Activity
 
 Visualisasi:
 
-- Bar Chart
+![alt text](assets/q1.png)
 
-Menampilkan:
+## Insight
 
-- kategori paling populer
-- reorder rate
-- total revenue
+Visualisasi ini menunjukkan tren aktivitas order harian.
 
+Insight yang dapat diperoleh:
 
-## Q3 — Reorder Distribution
-
-Visualisasi:
-
-- Pie Chart
-
-Menampilkan:
-
-- reordered vs first purchase
-
-
-## Q4 — Payment Method Distribution
-
-Visualisasi:
-
-- Pie Chart
-
-
-## Q5 — Top Shipping Cities
-
-Visualisasi:
-
-- Bar Chart
-
-
-## Q6 — Basket Size Distribution
-
-Visualisasi:
-
-- Histogram / Bar Chart
-
-
-## Q7 — Top Reordered Products
-
-Visualisasi:
-
-- Bar Chart
-
-
-## Q8 — KPI Dashboard
-
-Visualisasi:
-
-- Scorecards
-
-Menampilkan:
-
-- total orders
-- total customers
-- total products
-- total revenue
-
-
-## Q9 — Category Product Distribution
-
-Visualisasi:
-
-- Bar Chart
-
+* mengetahui hari dengan volume order tertinggi
+* melihat pola kenaikan atau penurunan transaksi
+* mendeteksi peak shopping activity
+* mengukur pertumbuhan transaksi dari waktu ke waktu
 
 ---
 
+## Q2: Top 30 Most Ordered Products
 
-# 📊 Power BI Visualization
+Visualisasi:
 
-Selain Metabase, dataset juga dapat divisualisasikan menggunakan **Power BI**.
+![alt text](assets/q2.png)
 
+## Insight
 
-## Connection Settings
+Menampilkan produk yang paling sering dibeli customer.
 
-| Field | Value |
-|---|---|
-| Host | localhost |
-| Port | 8123 |
-| Database | mci2026_db |
-| Username | kelompok28 |
-| Password | kelompok28 |
+Insight:
 
+* Mengetahui produk terlaris pada platform.
+* Mengidentifikasi produk dengan demand tertinggi.
+* Membantu strategi inventory dan restock produk.
+* Menentukan produk utama untuk promosi atau bundling.
+
+---
+
+## Q3 — Most Popular Departments
+
+Visualisasi:
+
+![alt text](assets/q3.png)
+
+## Insight
+
+Menampilkan performa setiap kategori produk.
+
+Insight:
+
+* Mengetahui kategori produk dengan volume penjualan terbesar.
+* Mengukur tingkat loyalitas pelanggan melalui reorder rate.
+* Department dengan reorder rate tinggi menunjukkan customer retention yang baik.
+* Membantu menentukan fokus bisnis dan prioritas stok.
+
+---
+
+## Q4 — Reorder Distribution
+
+Visualisasi:
+
+![alt text](assets/q4.png)
+
+## Insight
+
+Membandingkan jumlah pembelian ulang (reordered) dengan pembelian pertama.
+
+Insight:
+
+* Mengukur customer loyalty terhadap produk.
+* Persentase reorder tinggi menunjukkan produk sering dikonsumsi ulang.
+* Dapat digunakan untuk analisis customer retention.
+* Membantu identifikasi produk konsumsi rutin.
+
+---
+
+## Q5 — Top 10 Most Active Users
+
+Visualisasi:
+
+![alt text](assets/q5.png)
+
+## Insight
+
+Menampilkan user dengan aktivitas transaksi tertinggi.
+
+Insight:
+
+* Mengidentifikasi pelanggan paling aktif.
+* Mengetahui perilaku heavy users.
+* Dapat digunakan untuk loyalty program atau segmentation.
+* Membantu analisis customer value dan engagement.
+
+---
+
+## Q6 — Most Popular Aisles
+
+Visualisasi:
+
+![alt text](assets/q6.png)
+
+## Insight
+
+Menganalisis aisle/rak produk yang paling sering dikunjungi melalui pembelian.
+
+Insight:
+
+* Mengetahui area produk paling populer.
+* Membantu memahami preferensi konsumen.
+* Menentukan aisle dengan demand tertinggi.
+* Dapat digunakan untuk strategi penempatan produk dan promosi.
+
+---
+
+## Q7 — Basket Size Distribution
+
+Visualisasi:
+
+![alt text](assets/q7.png)
+
+## Insight
+
+Menganalisis distribusi jumlah item dalam setiap order.
+
+Insight:
+
+* Mengetahui kebiasaan belanja user.
+* Mengidentifikasi apakah mayoritas user membeli sedikit atau banyak item.
+* Basket size besar dapat menunjukkan high-value customer.
+* Membantu strategi cross-selling dan bundling.
+
+---
+
+## Q8 — Top Reordered Products
+
+Visualisasi:
+
+![alt text](assets/q8.png)
+
+## Insight
+
+Menampilkan produk dengan tingkat reorder tertinggi.
+
+Insight:
+
+* Mengetahui produk dengan loyalitas pelanggan paling tinggi.
+* Produk dengan reorder rate tinggi biasanya merupakan kebutuhan rutin.
+* Membantu strategi subscription atau recurring orders.
+* Dapat digunakan untuk rekomendasi produk favorit pelanggan.
+
+---
+
+## Q9 — KPI Summary Dashboard
+
+Visualisasi:
+
+![alt text](assets/q9.png)
+
+## Insight
+
+Memberikan ringkasan metrik utama dari keseluruhan dataset.
+
+Insight:
+
+* Total transaksi yang terjadi.
+* Jumlah user unik dan produk unik.
+* Banyaknya department aktif.
+* Total item yang terjual.
+* Tingkat reorder keseluruhan platform.
+
+---
+
+## Q10 — Shopping Time Analysis
+
+Visualisasi:
+
+![alt text](assets/q10.png)
+
+## Insight
+
+Menganalisis jam belanja paling ramai berdasarkan order.
+
+Insight:
+
+* Mengetahui peak hour transaksi.
+* Membantu optimasi sistem saat traffic tinggi.
+* Dapat digunakan untuk strategi promo berbasis waktu.
+* Membantu penjadwalan operasional dan resource allocation.
+
+---
 
 # ✅ Hasil Pipeline
 
@@ -353,7 +485,7 @@ Pipeline berhasil:
 - Menyimpan ke data lake
 - Memproses analytics menggunakan Spark
 - Memuat data ke ClickHouse
-- Divisualisasikan di Metabase & Power BI
+- Divisualisasikan di Metabase atau Power BI
 
 
 *MCI2026 — Modul 2 & 3 — Task 2 — Kelompok 28*
