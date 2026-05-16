@@ -1,23 +1,23 @@
 # 🚀 MCI2026 Task 2 — Orders Data Pipeline  
 ### Kelompok 28
+# 👥 Anggota Kelompok 28
+
+| Nama | NRP |
+|---|---|
+| Muh. Aqil Alqadri Syahid | 5025241161 |
+| Kadek Andra Wikanjaya Putra | 5025241187 |
 
 **Pipeline Orchestration & Data Visualization**  
 `Apache Airflow` → `PySpark` → `ClickHouse` → `Metabase / Power BI`
 
----
-
 # 📋 Daftar Isi
-
 1. Overview  
 2. Arsitektur Pipeline  
 3. Struktur Repository  
 4. Cara Menjalankan  
 5. Penjelasan Script  
 6. Data Warehouse Schema  
-7. Metabase Visualization  
-8. Power BI Visualization  
-9. Troubleshooting  
-10. Anggota Kelompok  
+7. Metabase Visualization
 
 ---
 
@@ -39,11 +39,11 @@ http://96.9.212.102:8000/orders
 
 Dataset berbentuk **Instacart-style grocery orders** yang berisi:
 
-- orders
-- products
-- category / department
-- reordered items
-- customer orders
+- **orders**
+- **products**
+- **category / department**
+- **reordered items**
+- **customer orders**
 
 ---
 
@@ -65,7 +65,7 @@ Dataset berbentuk **Instacart-style grocery orders** yang berisi:
          └────────────────────────────────┘
                           │
                           ▼
-         process_orders_spark.py (PySpark)
+          process_orders_spark.py (PySpark)
                           │
         ┌─────────────────┼─────────────────┐
         │                 │                 │
@@ -74,85 +74,15 @@ Dataset berbentuk **Instacart-style grocery orders** yang berisi:
     _products         _summary
                           │
                           ▼
-                ┌────────────────┐
-                │   ClickHouse   │
-                │   mci2026_db   │
-                └────────────────┘
+                  ┌────────────────┐
+                  │   ClickHouse   │
+                  │   mci2026_db   │
+                  └────────────────┘
                           │
             ┌─────────────┴─────────────┐
             ▼                           ▼
        Metabase                    Power BI
 ```
-
----
-
-# 📂 Struktur Repository
-
-```text
-tugas-modul-2-3/
-│
-├── docker-compose.yml
-│
-├── dags/
-│   ├── pipeline.py
-│   │
-│   └── scripts/
-│       ├── fetch_orders.py
-│       └── process_orders_spark.py
-│
-├── data_lake/
-│   └── orders/
-│
-├── sql/
-│   └── metabase_queries.sql
-│
-├── requirements.txt
-│
-└── README.md
-```
-
----
-
-# 🐳 Cara Menjalankan
-
-## 1. Clone Repository
-
-```bash
-git clone <repository-url>
-cd tugas-modul-2-3
-```
-
----
-
-## 2. Buat Folder Data Lake
-
-```bash
-mkdir -p data_lake/orders
-```
-
----
-
-## 3. Jalankan Docker Compose
-
-```bash
-docker compose up -d
-```
-
----
-
-## 4. Cek Container
-
-```bash
-docker compose ps
-```
-
-Pastikan container berikut berjalan:
-
-- postgres
-- airflow-webserver
-- airflow-scheduler
-- clickhouse-server
-- metabase
 
 ---
 
@@ -261,12 +191,6 @@ process_orders_spark
 end
 ```
 
-Schedule:
-
-```python
-schedule_interval="@daily"
-```
-
 ---
 
 # 🗄 ClickHouse Schema
@@ -301,19 +225,9 @@ Analytics harian.
 
 # Setup Metabase
 
-## Tambahkan Database
-
-Masuk ke:
-
-```text
-Admin → Databases → Add Database
-```
-
----
-
 ## Pilih ClickHouse
 
-Isi:
+**Database Information**:
 
 | Field | Value |
 |---|---|
@@ -432,36 +346,11 @@ Visualisasi:
 
 - Bar Chart
 
----
+
 
 # 📊 Power BI Visualization
 
 Selain Metabase, dataset juga dapat divisualisasikan menggunakan **Power BI**.
-
----
-
-# 🔌 Connect Power BI ke ClickHouse
-
-## Install ClickHouse ODBC Driver
-
-Download:
-
-```text
-https://clickhouse.com/docs/en/interfaces/odbc
-```
-
----
-
-## Tambahkan Data Source
-
-Di Power BI:
-
-```text
-Get Data
-  → ODBC
-```
-
-Pilih ClickHouse DSN.
 
 ---
 
@@ -477,64 +366,15 @@ Pilih ClickHouse DSN.
 
 ---
 
-# 📈 Recommended Power BI Charts
-
-| Dashboard | Visualization |
-|---|---|
-| Daily Orders | Line Chart |
-| Revenue Trend | Area Chart |
-| Top Products | Horizontal Bar |
-| Category Revenue | Treemap |
-| Reorder Distribution | Donut Chart |
-| Customer Analytics | Table |
-| KPI Summary | Cards |
-
----
-
-# 🔧 Troubleshooting
-
-| Problem | Cause | Solution |
-|---|---|---|
-| DAG tidak muncul | syntax error DAG | cek scheduler logs |
-| Spark gagal membaca parquet | folder kosong | jalankan fetch_orders |
-| ClickHouse kosong | insert gagal | cek process_orders_spark logs |
-| Metabase tidak connect | hostname salah | gunakan clickhouse-server |
-| Power BI gagal connect | ODBC belum install | install ClickHouse ODBC |
-| `reordered` column missing | parquet schema lama | hapus parquet lama |
-
----
-
-# 🧹 Reset Pipeline
-
-Jika schema berubah:
-
-```bash
-rm -rf data_lake/orders/*.parquet
-```
-
-Lalu trigger ulang DAG.
-
----
-
-# 👥 Anggota Kelompok 28
-
-| Nama | NRP |
-|---|---|
-| ... | ... |
-| ... | ... |
-| ... | ... |
-
----
-
 # ✅ Hasil Pipeline
 
 Pipeline berhasil:
 
-- mengambil data dari API
-- menyimpan ke data lake
-- memproses analytics menggunakan Spark
-- memuat data ke ClickHouse
-- divisualisasikan di Metabase & Power BI
+- Mengambil data dari API
+- Menyimpan ke data lake
+- Memproses analytics menggunakan Spark
+- Memuat data ke ClickHouse
+- Divisualisasikan di Metabase & Power BI
 
 ---
 
