@@ -2,38 +2,43 @@
 -- Dataset: Grocery Orders
 -- Database: mci2026_db
 
+-- Q1: Daily Order Activity
+SELECT
+    order_date,
+    total_orders,
+    total_items
+FROM mci2026_db.orders_daily_orders
+ORDER BY order_date ASC;
 
--- Q1: Top 30 Most Ordered Products
--- Produk paling sering dibeli
+
+-- Q2: Top 30 Most Ordered Products
 SELECT
     product_name,
-    category,
+    department,
     total_orders,
-    total_qty_sold,
-    total_reordered,
-    total_revenue
+    total_items,
+    total_reordered
 FROM mci2026_db.orders_trending_products
-ORDER BY total_qty_sold DESC
+ORDER BY total_items DESC
 LIMIT 30;
 
 
--- Q2: Most Popular Categories
--- Kategori dengan item paling banyak terjual
+-- Q3: Most Popular Departments
 SELECT
-    category,
+    department,
     total_orders,
     total_items_sold,
-    round(reorder_rate * 100, 2) AS reorder_rate_percent,
-    total_revenue
+    round(reorder_rate * 100, 2)
+        AS reorder_rate_percent
 FROM mci2026_db.orders_category_summary
 ORDER BY total_items_sold DESC;
 
 
--- Q3: Reorder Distribution
--- Persentase reorder vs first purchase
+-- Q4: Reorder Distribution
 SELECT
     CASE
-        WHEN reordered = 1 THEN 'Reordered'
+        WHEN reordered = 1
+            THEN 'Reordered'
         ELSE 'First Purchase'
     END AS reorder_status,
     count() AS total_items,
@@ -47,41 +52,44 @@ GROUP BY reorder_status
 ORDER BY total_items DESC;
 
 
--- Q4: Payment Method Distribution
--- Distribusi metode pembayaran
+-- Q5: Top 10 Most Active Users
 SELECT
-    payment_method,
-    count() AS total_transactions,
-    round(
-        sum(total_price),
-        2
-    ) AS total_revenue
+    user_id,
+    countDistinct(order_id)
+        AS total_orders,
+    count()
+        AS total_items,
+    avg(add_to_cart_order)
+        AS avg_cart_position
 FROM mci2026_db.orders
-GROUP BY payment_method
-ORDER BY total_transactions DESC;
+GROUP BY user_id
+ORDER BY total_items DESC
+LIMIT 10;
 
 
--- Q5: Top Shipping Cities
--- Kota dengan transaksi terbanyak
+-- Q6: Most Popular Aisles
 SELECT
-    shipping_city,
-    countDistinct(order_id) AS total_orders,
-    round(
-        sum(total_price),
-        2
-    ) AS total_revenue
+    aisle,
+    count()
+        AS total_items,
+    countDistinct(order_id)
+        AS total_orders
 FROM mci2026_db.orders
-GROUP BY shipping_city
-ORDER BY total_orders DESC;
+WHERE aisle != ''
+GROUP BY aisle
+ORDER BY total_items DESC
+LIMIT 15;
 
 
--- Q6: Basket Size Distribution
--- Distribusi jumlah item per order
+-- Q7: Basket Size Distribution
 SELECT
     CASE
-        WHEN item_count <= 5 THEN '1-5 Items'
-        WHEN item_count <= 10 THEN '6-10 Items'
-        WHEN item_count <= 20 THEN '11-20 Items'
+        WHEN item_count <= 5
+            THEN '1-5 Items'
+        WHEN item_count <= 10
+            THEN '6-10 Items'
+        WHEN item_count <= 20
+            THEN '11-20 Items'
         ELSE '20+ Items'
     END AS basket_size,
     count() AS total_orders
@@ -96,41 +104,37 @@ GROUP BY basket_size
 ORDER BY total_orders DESC;
 
 
--- Q7: Top Reordered Products
--- Produk dengan reorder rate tertinggi
+-- Q8: Top Reordered Products
 SELECT
     product_name,
-    category,
-    sum(reordered) AS total_reordered,
-    count() AS total_orders,
+    department,
+    sum(reordered)
+        AS total_reordered,
+    count()
+        AS total_orders,
     round(
-        sum(reordered) * 100.0 /
-        count(),
+        sum(reordered) * 100.0 / count(),
         2
     ) AS reorder_rate_pct
 FROM mci2026_db.orders
-GROUP BY product_name, category
+GROUP BY product_name, department
 HAVING total_orders >= 5
 ORDER BY reorder_rate_pct DESC
 LIMIT 20;
 
 
--- Q8: KPI Summary Dashboard
--- Ringkasan utama dataset
+-- Q9: KPI Summary Dashboard
 SELECT
-    countDistinct(order_id) AS total_orders,
-    countDistinct(customer_id) AS unique_customers,
-    countDistinct(product_id) AS unique_products,
-    countDistinct(category) AS unique_categories,
-    count() AS total_items_sold,
-    round(
-        sum(total_price),
-        2
-    ) AS total_revenue,
-    round(
-        avg(total_price),
-        2
-    ) AS avg_transaction_value,
+    countDistinct(order_id)
+        AS total_orders,
+    countDistinct(user_id)
+        AS unique_users,
+    countDistinct(product_id)
+        AS unique_products,
+    countDistinct(department)
+        AS unique_departments,
+    count()
+        AS total_items_sold,
     round(
         avg(reordered) * 100,
         2
@@ -138,15 +142,13 @@ SELECT
 FROM mci2026_db.orders;
 
 
--- Q9: Revenue by Category
--- Total revenue tiap kategori
+-- Q10: Shopping Time Analysis
 SELECT
-    category,
-    count(product_id) AS total_products_sold,
-    round(
-        sum(total_price),
-        2
-    ) AS total_revenue
+    order_hour_of_day,
+    countDistinct(order_id)
+        AS total_orders,
+    count()
+        AS total_items
 FROM mci2026_db.orders
-GROUP BY category
-ORDER BY total_revenue DESC;
+GROUP BY order_hour_of_day
+ORDER BY order_hour_of_day ASC;

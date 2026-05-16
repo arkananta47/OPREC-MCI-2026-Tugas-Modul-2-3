@@ -2,13 +2,15 @@ import requests
 import pandas as pd
 import os
 from datetime import datetime
-import random
 
 def fetch_orders():
+
     print("Mengambil data dari API Orders...")
+
     url = "http://96.9.212.102:8000/orders"
 
     response = requests.get(url, timeout=30)
+
     response.raise_for_status()
 
     data = response.json()
@@ -20,7 +22,22 @@ def fetch_orders():
     for order in orders:
 
         order_id = str(order.get("order_id"))
-        customer_id = str(order.get("user_id"))
+
+        user_id = str(order.get("user_id"))
+
+        order_number = int(order.get("order_number", 0))
+
+        order_dow = int(order.get("order_dow", 0))
+
+        order_hour_of_day = int(
+            order.get("order_hour_of_day", 0)
+        )
+
+        days_since_prior_order = int(
+            order.get("days_since_prior_order", 0)
+        )
+
+        eval_set = str(order.get("eval_set"))
 
         order_date = datetime.now().strftime("%Y-%m-%d")
 
@@ -28,57 +45,50 @@ def fetch_orders():
 
         for product in products:
 
-            quantity = 1
-
-            unit_price = round(
-                (product.get("product_id", 1) % 50) + 1,
-                2
-            )
-
-            total_price = round(unit_price * quantity, 2)
-
-            discount = round(random.uniform(0, 5), 2)
-
-            tax = round(total_price * 0.1, 2)
-
             parsed_data.append({
 
                 "order_id": order_id,
 
-                "customer_id": customer_id,
+                "user_id": user_id,
 
-                "product_id": str(product.get("product_id")),
+                "order_number": order_number,
 
-                "product_name": str(product.get("product_name")),
+                "order_dow": order_dow,
 
-                "category": str(product.get("department")),
+                "order_hour_of_day": order_hour_of_day,
 
-                "quantity": quantity,
+                "days_since_prior_order":
+                    days_since_prior_order,
 
-                "unit_price": unit_price,
+                "eval_set": eval_set,
 
-                "total_price": total_price,
+                "product_id": str(
+                    product.get("product_id")
+                ),
 
-                "discount": discount,
+                "product_name": str(
+                    product.get("product_name")
+                ),
 
-                "tax": tax,
+                "aisle_id": int(
+                    product.get("aisle_id", 0)
+                ),
 
-                "status": "completed",
+                "aisle": str(
+                    product.get("aisle")
+                ),
 
-                "payment_method": random.choice([
-                    "credit_card",
-                    "bank_transfer",
-                    "e_wallet"
-                ]),
+                "department_id": int(
+                    product.get("department_id", 0)
+                ),
 
-                "shipping_city": random.choice([
-                    "Jakarta",
-                    "Surabaya",
-                    "Bandung",
-                    "Medan"
-                ]),
+                "department": str(
+                    product.get("department")
+                ),
 
-                "shipping_country": "Indonesia",
+                "add_to_cart_order": int(
+                    product.get("add_to_cart_order", 0)
+                ),
 
                 "reordered": int(
                     product.get("reordered", 0)
@@ -92,7 +102,7 @@ def fetch_orders():
 
                 "ingested_at": datetime.now().strftime(
                     "%Y-%m-%d %H:%M:%S"
-                ),
+                )
             })
 
     df = pd.DataFrame(parsed_data)

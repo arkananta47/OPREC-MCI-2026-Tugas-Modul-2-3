@@ -22,34 +22,26 @@ def run_spark_analytics():
     )
 
     # =========================================================
-    # CAST DATA TYPE
+    # CAST TYPE
     # =========================================================
 
     df_raw = df_raw \
-        .withColumn(
-            "quantity",
-            F.col("quantity").cast("int")
-        ) \
-        .withColumn(
-            "unit_price",
-            F.col("unit_price").cast("double")
-        ) \
-        .withColumn(
-            "total_price",
-            F.col("total_price").cast("double")
-        ) \
-        .withColumn(
-            "discount",
-            F.col("discount").cast("double")
-        ) \
-        .withColumn(
-            "tax",
-            F.col("tax").cast("double")
-        ) \
-        .withColumn(
-            "reordered",
-            F.col("reordered").cast("int")
-        )
+        .withColumn("order_number",
+            F.col("order_number").cast("int")) \
+        .withColumn("order_dow",
+            F.col("order_dow").cast("int")) \
+        .withColumn("order_hour_of_day",
+            F.col("order_hour_of_day").cast("int")) \
+        .withColumn("days_since_prior_order",
+            F.col("days_since_prior_order").cast("int")) \
+        .withColumn("aisle_id",
+            F.col("aisle_id").cast("int")) \
+        .withColumn("department_id",
+            F.col("department_id").cast("int")) \
+        .withColumn("add_to_cart_order",
+            F.col("add_to_cart_order").cast("int")) \
+        .withColumn("reordered",
+            F.col("reordered").cast("int"))
 
     print("Menghitung analytics...")
 
@@ -60,26 +52,13 @@ def run_spark_analytics():
     trending_products = df_raw.groupBy(
         "product_id",
         "product_name",
-        "category"
+        "department"
     ).agg(
-        F.countDistinct("order_id").alias(
-            "total_orders"
-        ),
-
-        F.sum("quantity").alias(
-            "total_qty_sold"
-        ),
-
-        F.sum("reordered").alias(
-            "total_reordered"
-        ),
-
-        F.sum("total_price").alias(
-            "total_revenue"
-        )
-
+        F.countDistinct("order_id").alias("total_orders"),
+        F.count("*").alias("total_items"),
+        F.sum("reordered").alias("total_reordered")
     ).orderBy(
-        F.desc("total_qty_sold")
+        F.desc("total_items")
     ).limit(30)
 
     # =========================================================
@@ -87,25 +66,11 @@ def run_spark_analytics():
     # =========================================================
 
     category_summary = df_raw.groupBy(
-        "category"
+        "department"
     ).agg(
-
-        F.countDistinct("order_id").alias(
-            "total_orders"
-        ),
-
-        F.sum("quantity").alias(
-            "total_items_sold"
-        ),
-
-        F.avg("reordered").alias(
-            "reorder_rate"
-        ),
-
-        F.sum("total_price").alias(
-            "total_revenue"
-        )
-
+        F.countDistinct("order_id").alias("total_orders"),
+        F.count("*").alias("total_items_sold"),
+        F.avg("reordered").alias("reorder_rate")
     ).orderBy(
         F.desc("total_items_sold")
     )
@@ -117,19 +82,8 @@ def run_spark_analytics():
     daily_orders = df_raw.groupBy(
         "order_date"
     ).agg(
-
-        F.countDistinct("order_id").alias(
-            "total_orders"
-        ),
-
-        F.sum("quantity").alias(
-            "total_items"
-        ),
-
-        F.sum("total_price").alias(
-            "daily_revenue"
-        )
-
+        F.countDistinct("order_id").alias("total_orders"),
+        F.count("*").alias("total_items")
     ).orderBy("order_date")
 
     # =========================================================
@@ -140,31 +94,6 @@ def run_spark_analytics():
     df_categories = category_summary.toPandas()
     df_daily = daily_orders.toPandas()
     df_all = df_raw.toPandas()
-
-    # =========================================================
-    # FIX NUMPY TYPE
-    # =========================================================
-
-    df_products = df_products.astype({
-        "total_orders": "int32",
-        "total_qty_sold": "int32",
-        "total_reordered": "int32"
-    })
-
-    df_categories = df_categories.astype({
-        "total_orders": "int32",
-        "total_items_sold": "int32"
-    })
-
-    df_daily = df_daily.astype({
-        "total_orders": "int32",
-        "total_items": "int32"
-    })
-
-    df_all = df_all.astype({
-        "quantity": "int32",
-        "reordered": "int32"
-    })
 
     # =========================================================
     # CLICKHOUSE
@@ -195,16 +124,15 @@ def run_spark_analytics():
 
             product_id String,
             product_name String,
-            category String,
+            department String,
 
             total_orders Int32,
-            total_qty_sold Int32,
-            total_reordered Int32,
-            total_revenue Float64
+            total_items Int32,
+            total_reordered Int32
 
         )
         ENGINE = MergeTree()
-        ORDER BY total_qty_sold
+        ORDER BY total_items
     ''')
 
     data_products = [
@@ -218,10 +146,7 @@ def run_spark_analytics():
             data_products
         )
 
-    print(
-        f"✅ orders_trending_products: "
-        f"{len(data_products)} rows"
-    )
+    print(f"✅ orders_trending_products: {len(data_products)} rows")
 
     # =========================================================
     # TABLE: orders_category_summary
@@ -234,13 +159,12 @@ def run_spark_analytics():
     client.execute('''
         CREATE TABLE mci2026_db.orders_category_summary (
 
-            category String,
+            department String,
 
             total_orders Int32,
             total_items_sold Int32,
 
-            reorder_rate Float64,
-            total_revenue Float64
+            reorder_rate Float64
 
         )
         ENGINE = MergeTree()
@@ -258,10 +182,7 @@ def run_spark_analytics():
             data_categories
         )
 
-    print(
-        f"✅ orders_category_summary: "
-        f"{len(data_categories)} rows"
-    )
+    print(f"✅ orders_category_summary: {len(data_categories)} rows")
 
     # =========================================================
     # TABLE: orders_daily_orders
@@ -277,8 +198,7 @@ def run_spark_analytics():
             order_date String,
 
             total_orders Int32,
-            total_items Int32,
-            daily_revenue Float64
+            total_items Int32
 
         )
         ENGINE = MergeTree()
@@ -296,10 +216,7 @@ def run_spark_analytics():
             data_daily
         )
 
-    print(
-        f"✅ orders_daily_orders: "
-        f"{len(data_daily)} rows"
-    )
+    print(f"✅ orders_daily_orders: {len(data_daily)} rows")
 
     # =========================================================
     # TABLE: orders
@@ -313,26 +230,25 @@ def run_spark_analytics():
         CREATE TABLE mci2026_db.orders (
 
             order_id String,
-            customer_id String,
+            user_id String,
+
+            order_number Int32,
+            order_dow Int32,
+            order_hour_of_day Int32,
+            days_since_prior_order Int32,
+
+            eval_set String,
 
             product_id String,
             product_name String,
-            category String,
 
-            quantity Int32,
+            aisle_id Int32,
+            aisle String,
 
-            unit_price Float64,
-            total_price Float64,
+            department_id Int32,
+            department String,
 
-            discount Float64,
-            tax Float64,
-
-            status String,
-
-            payment_method String,
-
-            shipping_city String,
-            shipping_country String,
+            add_to_cart_order Int32,
 
             reordered Int32,
 

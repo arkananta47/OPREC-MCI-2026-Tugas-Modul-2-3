@@ -1,4 +1,7 @@
-# 🚀 MCI2026 Task 2 — Orders Data Pipeline  
+# 🚀 OPREC MCI 2026 Task 2 — Orders Data Pipeline  
+
+> Tugas Modul 2 & 3 Lab MCI 2026 · End-to-End Modern Data Stack Implementation
+
 # 👥 Anggota Kelompok 28
 
 | Nama | NRP |
@@ -7,16 +10,18 @@
 | Kadek Andra Wikanjaya Putra | 5025241187 |
 
 
+
 **Pipeline Orchestration & Data Visualization**  
 `Apache Airflow` → `PySpark` → `ClickHouse` → `Metabase / Power BI`
 
+---
 
 # 📋 Daftar Isi
-1. Overview  
-2. Arsitektur Pipeline  
-3. Penjelasan Script  
-4. Clickhouse Schema  
-5. Metabase Visualization
+1. **Overview**  
+2. **Arsitektur Pipeline**  
+3. **Penjelasan Script**  
+4. **Clickhouse Schema**  
+5. **Metabase Visualization**
 
 ---
 
