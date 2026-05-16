@@ -1,5 +1,4 @@
 # 🚀 MCI2026 Task 2 — Orders Data Pipeline  
-### Kelompok 28
 # 👥 Anggota Kelompok 28
 
 | Nama | NRP |
@@ -7,17 +6,17 @@
 | Muh. Aqil Alqadri Syahid | 5025241161 |
 | Kadek Andra Wikanjaya Putra | 5025241187 |
 
+
 **Pipeline Orchestration & Data Visualization**  
 `Apache Airflow` → `PySpark` → `ClickHouse` → `Metabase / Power BI`
+
 
 # 📋 Daftar Isi
 1. Overview  
 2. Arsitektur Pipeline  
-3. Struktur Repository  
-4. Cara Menjalankan  
-5. Penjelasan Script  
-6. Data Warehouse Schema  
-7. Metabase Visualization
+3. Penjelasan Script  
+4. Clickhouse Schema  
+5. Metabase Visualization
 
 ---
 
@@ -59,10 +58,10 @@ Dataset berbentuk **Instacart-style grocery orders** yang berisi:
               fetch_orders.py (Airflow)
                           │
                           ▼
-         ┌────────────────────────────────┐
-         │      Data Lake (Parquet)       │
-         │ data_lake/orders/*.parquet     │
-         └────────────────────────────────┘
+          ┌────────────────────────────────┐
+          │      Data Lake (Parquet)       │
+          │ data_lake/orders/*.parquet     │
+          └────────────────────────────────┘
                           │
                           ▼
           process_orders_spark.py (PySpark)
@@ -156,7 +155,6 @@ Script ini:
 data_lake/orders/orders_YYYYMMDD_HHMMSS.parquet
 ```
 
----
 
 # 2. process_orders_spark.py
 
@@ -175,7 +173,6 @@ Script ini:
 | orders_category_summary | category analytics |
 | orders_daily_orders | daily analytics |
 
----
 
 # 3. pipeline.py
 
@@ -237,25 +234,10 @@ Analytics harian.
 | Username | kelompok28 |
 | Password | kelompok28 |
 
----
 
 # 📈 Dashboard Queries
 
-## Q1 — Daily Order Activity
-
-Visualisasi:
-
-- Line Chart
-
-Menampilkan:
-
-- total_orders
-- total_items
-- daily_revenue
-
----
-
-## Q2 — Top Ordered Products
+## Q1 — Top Ordered Products
 
 Visualisasi:
 
@@ -265,9 +247,8 @@ Menampilkan:
 
 - produk paling sering dibeli
 
----
 
-## Q3 — Category Summary
+## Q2 — Category Summary
 
 Visualisasi:
 
@@ -279,9 +260,8 @@ Menampilkan:
 - reorder rate
 - total revenue
 
----
 
-## Q4 — Reorder Distribution
+## Q3 — Reorder Distribution
 
 Visualisasi:
 
@@ -291,41 +271,36 @@ Menampilkan:
 
 - reordered vs first purchase
 
----
 
-## Q5 — Payment Method Distribution
+## Q4 — Payment Method Distribution
 
 Visualisasi:
 
 - Pie Chart
 
----
 
-## Q6 — Top Shipping Cities
+## Q5 — Top Shipping Cities
 
 Visualisasi:
 
 - Bar Chart
 
----
 
-## Q7 — Basket Size Distribution
+## Q6 — Basket Size Distribution
 
 Visualisasi:
 
 - Histogram / Bar Chart
 
----
 
-## Q8 — Top Reordered Products
+## Q7 — Top Reordered Products
 
 Visualisasi:
 
 - Bar Chart
 
----
 
-## Q9 — KPI Dashboard
+## Q8 — KPI Dashboard
 
 Visualisasi:
 
@@ -338,21 +313,21 @@ Menampilkan:
 - total products
 - total revenue
 
----
 
-## Q10 — Category Product Distribution
+## Q9 — Category Product Distribution
 
 Visualisasi:
 
 - Bar Chart
 
 
+---
+
 
 # 📊 Power BI Visualization
 
 Selain Metabase, dataset juga dapat divisualisasikan menggunakan **Power BI**.
 
----
 
 ## Connection Settings
 
@@ -364,7 +339,6 @@ Selain Metabase, dataset juga dapat divisualisasikan menggunakan **Power BI**.
 | Username | kelompok28 |
 | Password | kelompok28 |
 
----
 
 # ✅ Hasil Pipeline
 
@@ -376,6 +350,5 @@ Pipeline berhasil:
 - Memuat data ke ClickHouse
 - Divisualisasikan di Metabase & Power BI
 
----
 
 *MCI2026 — Modul 2 & 3 — Task 2 — Kelompok 28*
