@@ -13,6 +13,13 @@
 
 ---
 
+# Link Metabase Dashboard:
+```text
+http://localhost:3000/public/dashboard/b2de6533-b7a1-4213-9989-150585c81dc2
+```
+
+---
+
 # 🧰 Technology Stack
 
 **Pipeline Orchestration & Data Visualization**
